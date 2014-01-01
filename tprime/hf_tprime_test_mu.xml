@@ -1,0 +1,89 @@
+<!--
+    Single channel configuration.  
+    The top level configuration XML is hf_tprime.xml
+
+    NormalizedByTheory should be "True" (not "TRUE" or "true") for all non-data-driven backgrounds.
+
+    If you comment or remove the <Data> tag then it will use the expected data.
+
+    Histogram inputs should be in pb and in top-level xml the lumi should be in 1/pb
+    (The important thing is that they match... fb and 1/fb is also ok)
+
+    Note: Config.dtd needs to be accessible.  It can be found in ROOT release area.  
+    The file system path is relative to location of this XML file, not the executable.
+-->
+
+<!DOCTYPE Channel  SYSTEM '../config/HistFactorySchema.dtd'>
+    
+<!--
+
+  <Channel Name="mujets" InputFile="data/mujets_821/tprime_350_mujets_2D_821ipb_merged_19jul2011.root" HistoName="" >
+    <Data HistoName="Data_HtvsMfit" HistoPath="" />
+    <Sample Name="signal" HistoPath="" NormalizeByTheory="False" HistoName="TPrime350_HtvsMfit">
+      <HistoSys Name="jes" HistoNameHigh="TPrime350_HtvsMfit_JESup" HistoNameLow="TPrime350_HtvsMfit_JESdown"/>
+      <OverallSys Name="lepton_eff_mu" High="1.03" Low="0.97"/>
+      <OverallSys Name="btag_syst" High="1.05" Low="0.95"/>
+      <NormFactor Name="norm_sig_mu" Val="0.3125" Low="0.3125" High="0.3125" Const="True" />
+      <NormFactor Name="xsec" Val="0.0" Low="0.0" High="5.0" Const="True" />
+      <NormFactor Name="norm_mu" Val="1.0" Low="1.0" High="1.0" Const="True" />
+    </Sample>
+
+  <Channel Name="mujets" InputFile="data/mujets_821/tprime_400_mujets_2D_821ipb_merged_19jul2011.root" HistoName="" >
+    <Data HistoName="Data_HtvsMfit" HistoPath="" />
+    <Sample Name="signal" HistoPath="" NormalizeByTheory="False" HistoName="TPrime400_HtvsMfit">
+      <HistoSys Name="jes" HistoNameHigh="TPrime400_HtvsMfit_JESup" HistoNameLow="TPrime400_HtvsMfit_JESdown"/>
+      <OverallSys Name="lepton_eff_mu" High="1.03" Low="0.97"/>
+      <OverallSys Name="btag_syst" High="1.05" Low="0.95"/>
+      <NormFactor Name="norm_sig_mu" Val="0.711" Low="0.711" High="0.711" Const="True" />
+      <NormFactor Name="xsec" Val="0.0" Low="0.0" High="5.0" Const="True" />
+      <NormFactor Name="norm_mu" Val="1.0" Low="1.0" High="1.0" Const="True" />
+    </Sample>
+-->
+  <Channel Name="mujets" InputFile="data/mujets_821/tprime_450_mujets_2D_821ipb_merged_test.root" HistoName="" >
+    <Data HistoName="Data_HtvsMfit" HistoPath="" />
+    <Sample Name="signal" HistoPath="" NormalizeByTheory="False" HistoName="TPrime450_HtvsMfit">
+      <HistoSys Name="jes" HistoNameHigh="TPrime450_HtvsMfit_JESup" HistoNameLow="TPrime450_HtvsMfit_JESdown"/>
+      <OverallSys Name="lepton_eff_mu" High="1.03" Low="0.97"/>
+      <OverallSys Name="btag_syst" High="1.05" Low="0.95"/>
+      <NormFactor Name="norm_sig_mu" Val="1.510" Low="1.510" High="1.510" Const="True" />
+      <NormFactor Name="xsec" Val="0.0" Low="0.0" High="5.0" Const="True" />
+      <NormFactor Name="norm_mu" Val="1.0" Low="1.0" High="1.0" Const="True" />
+    </Sample>
+<!--
+  <Channel Name="mujets" InputFile="data/mujets_821/tprime_500_mujets_2D_821ipb_merged_19jul2011.root" HistoName="" >
+    <Data HistoName="Data_HtvsMfit" HistoPath="" />
+    <Sample Name="signal" HistoPath="" NormalizeByTheory="False" HistoName="TPrime500_HtvsMfit">
+      <HistoSys Name="jes" HistoNameHigh="TPrime500_HtvsMfit_JESup" HistoNameLow="TPrime500_HtvsMfit_JESdown"/>
+      <OverallSys Name="lepton_eff_mu" High="1.03" Low="0.97"/>
+      <OverallSys Name="btag_syst" High="1.05" Low="0.95"/>
+      <NormFactor Name="norm_sig_mu" Val="3.030" Low="3.030" High="3.030" Const="True" />
+      <NormFactor Name="xsec" Val="0.0" Low="0.0" High="5.0" Const="True" />
+      <NormFactor Name="norm_mu" Val="1.0" Low="1.0" High="1.0" Const="True" />
+    </Sample>
+
+-->
+    <Sample Name="top" HistoPath="" NormalizeByTheory="False" HistoName="TTjets_HtvsMfit">
+      <HistoSys Name="jes" HistoNameHigh="TTjets_HtvsMfit_JESup" HistoNameLow="TTjets_HtvsMfit_JESdown"/>
+      <OverallSys Name="norm_top_syst" High="1.114" Low="0.886"/>
+      <OverallSys Name="lepton_eff_mu" High="1.03" Low="0.97"/>
+      <OverallSys Name="btag_syst" High="1.05" Low="0.95"/>
+      <NormFactor Name="norm_top_mu" Val="1.0" Low="1.0" High="1.0" Const="True" />
+      <NormFactor Name="norm_mu" Val="1.0" Low="1.0" High="1.0" Const="True" />
+    </Sample>
+
+    <Sample Name="ewk" HistoPath="" NormalizeByTheory="True" HistoName="Ewk_HtvsMfit">
+      <HistoSys Name="jes" HistoNameHigh="Ewk_HtvsMfit_JESup" HistoNameLow="Ewk_HtvsMfit_JESdown"/>
+      <OverallSys Name="norm_ewk_syst" High="1.50" Low="0.50"/>
+      <NormFactor Name="norm_ewk_mu" Val="1.5" Low="1.5" High="1.5" Const="True" />
+      <NormFactor Name="norm_mu" Val="1.0" Low="1.0" High="1.0" Const="True" />
+    </Sample>
+<!--    
+    <Sample Name="qcd" HistoPath="" NormalizeByTheory="True" HistoName="QCD_HtvsMfit">
+      <OverallSys Name="norm_qcd_syst_mu" High="1.50" Low="0.50"/>
+      <NormFactor Name="norm_qcd_mu" Val="1.0" Low="1.0" High="1.0" Const="True" />
+      <NormFactor Name="norm_mu" Val="0.69541" Low="0.69541" High="0.69541" Const="True" />
+    </Sample>
+-->
+    
+  </Channel>
+ 

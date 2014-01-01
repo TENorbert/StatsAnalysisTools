@@ -1,0 +1,689 @@
+#include <iostream>
+#include <fstream>
+#include "TFile.h"
+#include "TH1F.h"
+#include "TH2F.h"
+
+#include "TCanvas.h"
+#include "TMath.h"
+#include "TF1.h"
+#include "TF2.h"
+
+//
+// Recent changes:
+//
+// - last unrebinned bin now added to the next-to-last
+// - signal precision included together with total background
+// - s=0 / b=0 is now  99999 (was 0)
+// - s>0 / b=0 is now 999999 (was 999)
+
+
+int nSmoothPasses = 10;
+
+
+
+// forward declaration
+void combineBins( std::string channel,
+		  int mass,
+		  double scale_factor,
+		  double femax,              // bin precision for background
+		  std::string inFileName,
+		  std::string outFileName,
+		  std::string prefix = "",
+		  bool make_plots = false,
+		  double femax_sig = 10.0 ); // separate bin precision for signal
+
+
+
+
+int MoveOverflow( TH2 * hist ){
+  //
+  // Move overflow into the visible range for 2D hist
+  //
+  // Start with (0,0) and always move overflow to the left
+  //
+  // (ny+1,0)---<------<----(nx+1,ny+1)
+  //      |                      |
+  //      |                      |
+  //      |                      |
+  //      v                      ^
+  //      |                      |
+  //      |    visible range     |
+  //      |                      |
+  //      v                      ^
+  //      |                      |
+  //      |                      |
+  //      |                      |
+  //    (0,0)--->------>----(nx+1,0)
+  //
+
+  int _moved = 0;
+
+  // figure out the binning
+  // remember that visible range is [1,n]
+  int nx = hist->GetNbinsX();
+  int ny = hist->GetNbinsY();
+
+  int nOverflowBins = 4 + 2*nx + 2*ny;
+
+  int i=0; // x axis bin
+  int j=0; // y axis bin
+  int i_dest, j_dest; // where to copy current bin
+  int ic, jc;
+  int ibin; // current bin
+  int ibin_dest; // current destination bin
+  bool _lock = false;
+  for (int k=0; k<nOverflowBins; ++k){
+
+    _lock = false;
+
+    ic = i;
+    jc = j;
+    //std::cout << "bin (" <<i<<", "<<j<<")";
+
+    if (j==0){                   // walks low line
+      i_dest = i;
+      j_dest = 1;
+      i = std::min(i+1,nx+1);
+
+      if (i!=i_dest) _lock = true;
+
+      ibin = hist->GetBin(i,j);
+      ibin_dest = hist->GetBin(i_dest,j_dest);
+      hist->SetBinContent( ibin_dest, hist->GetBinContent(ibin) );
+      hist->SetBinError( ibin_dest, hist->GetBinError(ibin) );
+      hist->SetBinContent( ibin, 0 );
+      hist->SetBinError( ibin, 0 );
+      
+      //std::cout << " moved to bin (" <<i_dest<<", "<<j_dest<<")";
+    }
+    if (j==ny+1 && !_lock){      // walks upper line
+      i_dest = i;
+      j_dest = ny;
+      i = std::max(i-1,0);
+
+      if (i!=i_dest) _lock = true;
+
+      ibin = hist->GetBin(i,j);
+      ibin_dest = hist->GetBin(i_dest,j_dest);
+      hist->SetBinContent( ibin_dest, hist->GetBinContent(ibin) );
+      hist->SetBinError( ibin_dest, hist->GetBinError(ibin) );
+      hist->SetBinContent( ibin, 0 );
+      hist->SetBinError( ibin, 0 );
+      
+      //std::cout << " moved to bin (" <<i_dest<<", "<<j_dest<<")";
+    }
+    if (i==nx+1 && !_lock){ // walks right side
+      i_dest = nx;
+      j_dest = j;
+      j = std::min(j+1,ny+1);
+
+      if (j!=j_dest) _lock = true;
+
+      ibin = hist->GetBin(i,j);
+      ibin_dest = hist->GetBin(i_dest,j_dest);
+      hist->SetBinContent( ibin_dest, hist->GetBinContent(ibin) );
+      hist->SetBinError( ibin_dest, hist->GetBinError(ibin) );
+      hist->SetBinContent( ibin, 0 );
+      hist->SetBinError( ibin, 0 );
+      
+      //std::cout << " moved to bin (" <<i_dest<<", "<<j_dest<<")";
+    }
+    if (i==0 && !_lock){ // walks left side
+      i_dest = 1;
+      j_dest = j;
+      j = std::max(j-1,0);
+
+      if (j!=j_dest) _lock = true;
+
+      ibin = hist->GetBin(i,j);
+      ibin_dest = hist->GetBin(i_dest,j_dest);
+      hist->SetBinContent( ibin_dest, hist->GetBinContent(ibin) );
+      hist->SetBinError( ibin_dest, hist->GetBinError(ibin) );
+      hist->SetBinContent( ibin, 0 );
+      hist->SetBinError( ibin, 0 );
+      
+      //std::cout << " moved to bin (" <<i_dest<<", "<<j_dest<<")";
+    }
+
+    ibin = hist->GetBin(ic,jc);
+    //std::cout << " left in bin: " << hist->GetBinContent(ibin) << std::endl;
+
+  }
+
+  // debug
+  //std::exit(-1);
+
+  return _moved;
+}
+
+
+
+
+void 
+combineBins( std::string channel, int mass, double scale_factor,
+	     double femax,
+	     std::string inFileName,
+	     std::string outFileName,
+	     std::string prefix,
+	     bool make_plots,
+	     double femax_sig ){
+
+  char * fname = (char *)(inFileName.c_str());
+
+  char * oname = (char *)(outFileName.c_str());
+
+  char sname[100]; //name of signal histogram
+  sprintf(sname,"tprime%i",mass);
+
+  std::vector<std::string> vBname;
+  vBname.push_back("DATA"); // data histogram must be first in this list
+  vBname.push_back("top");
+  vBname.push_back("ewk");
+  vBname.push_back("tprime%i__jes__plus");
+  vBname.push_back("tprime%i__jes__minus");
+  vBname.push_back("top__jes__plus");
+  vBname.push_back("top__jes__minus");
+  vBname.push_back("ewk__jes__plus");
+  vBname.push_back("ewk__jes__minus");
+  vBname.push_back("tprime%i__btgsf__plus");
+  vBname.push_back("tprime%i__btgsf__minus");
+  vBname.push_back("top__btgsf__plus");
+  vBname.push_back("top__btgsf__minus");
+  vBname.push_back("ewk__btgsf__plus");
+  vBname.push_back("ewk__btgsf__minus");
+  vBname.push_back("tprime%i__jer__plus");
+  vBname.push_back("tprime%i__jer__minus");
+  vBname.push_back("top__jer__plus");
+  vBname.push_back("top__jer__minus");
+  vBname.push_back("ewk__jer__plus");
+  vBname.push_back("ewk__jer__minus");
+
+  char bname[30][100];
+  
+  int nb=21; //number of histograms in list
+  int n_skip=3; // starting with this index, do not consider for background normalization
+
+  // bin precision for signal and background
+  std::vector<double> vFemax;
+  vFemax.push_back(femax_sig);
+  vFemax.push_back(femax);
+
+  TFile *f = TFile::Open(fname);
+  if (f==NULL) {
+    printf("Cannot open file '%s'\n",fname);
+    return;
+  }
+
+  // prune non-existent hists
+  int nb_new = 0;
+  for (std::vector<std::string>::const_iterator _n = vBname.begin();
+       _n != vBname.end();
+       ++_n){
+    sprintf(bname[nb_new],_n->c_str(), mass);      
+    if ( f->Get( bname[nb_new] ) ){
+      // add to list
+      ++nb_new;
+    }
+  }
+  nb = nb_new;
+  for (int i=0; i<nb; ++i){
+    std::cout << bname[i] << std::endl;
+  }
+  std::cout << "Total: " << nb << " valid histograms" << std::endl;
+
+  //TH2D* hs; f->GetObject(sname,hs); 
+  TH2D * hs = (TH2D *)f->Get(sname);
+  MoveOverflow(hs);
+  double sEntries = hs->GetEntries(); // number of entries in signal
+
+  if (hs==NULL) {
+    printf("Cannot find histogram '%s' in '%s'\n",sname,fname);
+    return;
+  }
+
+  // Gena: scale signal template to proper cross section
+  hs->Scale(scale_factor);
+
+  //figure out the binning
+  //int nx = hs->GetNbinsX()+2;
+  //int ny = hs->GetNbinsY()+2;
+  int nx = hs->GetNbinsX();
+  int ny = hs->GetNbinsY();
+
+  // cross check printout
+  std::cout << "2D hist name: " << hs->GetName() << std::endl;
+  std::cout << "Integral with overflow: " << hs->Integral(0,nx-1,0,ny-1) << std::endl;
+  std::cout << "Integral no overflow: " << hs->Integral(1,nx-2,1,ny-2) << std::endl << std::endl;
+
+  TH2D *hb = (TH2D*)hs->Clone(); 
+  hb->SetName("hb");
+  hb->Reset();
+  TH2D *hX[30];
+  double bEntries[30]; // array with number of entries
+  for (int i=0;i<nb;i++){
+    std::string sBName(bname[i]);
+    // GENA: get names for signal JES histos
+    if (sBName.find("TPrime")!=std::string::npos ||
+	sBName.find("Tprime")!=std::string::npos ||
+	sBName.find("tprime")!=std::string::npos){
+
+      sprintf(bname[i],sBName.c_str(),mass);
+      std::cout << bname[i] << std::endl;
+    }
+
+    hX[i] = 0;
+    hX[i] = (TH2D *)f->Get(bname[i]); 
+    MoveOverflow(hX[i]);
+
+    bEntries[i] = hX[i]->GetEntries();
+    
+    // GENA: scale JES signal templates to proper cross section
+    if (sBName.find("TPrime")!=std::string::npos ||
+	sBName.find("Tprime")!=std::string::npos ||
+	sBName.find("tprime")!=std::string::npos){
+      hX[i]->Scale(scale_factor);      
+    }
+    if (hX[i]==NULL) {
+      printf("Cannot find histogram '%s' in '%s'\n",bname[i],fname);
+      return;
+    }
+    //hX[i]->Print("base");
+    std::cout << "2D hist name: " << hX[i]->GetName() << std::endl;
+    std::cout << "Integral with overflow: " << hX[i]->Integral(0,nx+1,0,ny+1) << std::endl;
+    std::cout << "Integral no overflow: " << hX[i]->Integral(1,nx,1,ny) << std::endl << std::endl;
+    //sum all background histograms into hb; do not add the data histogram
+    if (i>0 && i<n_skip) hb->Add(hX[i]); 
+  }
+
+  int nbin=nx*ny;
+  std::cout << "number of bins: x="<<nx<<", y="<<ny<<std::endl;
+  
+  //book some 1d histograms with the same number of bins for diagnostics
+  TH1F *h1sb = new TH1F("h1sb","h1sb",nbin,0,nbin);
+  TH1F *h1s = new TH1F("h1s","h1s",nbin,0,nbin);
+  TH1F *h1b = new TH1F("h1b","h1b",nbin,0,nbin);
+  // GENA: vector to create 2D->1D bin map
+  std::vector<std::vector<int> > vMap(nbin);
+
+
+
+  float xs,xb,eb;
+  float xs_s,xb_s; // smoothed values - for sorting only
+  //xsb holds the s/b values for each bin
+  //xx are the histogram contents 
+  //(0=signal, 1=total background, 2=data, 3...nb-1=individual backgrounds)
+  float xsb[30000],xx[30000][30],xe[30000][30];
+  int ibin; 
+  double _sum = 0.0;
+  TH1F hLogSb("hLogSb", "log(s/b)", 100, -40, 60);
+  double _logsb;
+
+  // clone hs and hb hists just in case
+  TH2D * hsSmooth = (TH2D*)hs->Clone(); 
+  hsSmooth->SetName("hsSmooth");
+  TH2D * hbSmooth = (TH2D*)hb->Clone(); 
+  hbSmooth->SetName("hbSmooth");
+
+  // smooth signal and background histograms
+  for (int i=0; i<nSmoothPasses; ++i){
+    hsSmooth->Smooth(1, "k5a");
+    hbSmooth->Smooth(1, "k5a");
+  }
+
+  TCanvas * cs = new TCanvas();
+  hsSmooth->Draw("LEGO");
+  cs->SaveAs("hsSmooth.png");
+  hbSmooth->Draw("LEGO");
+  cs->SaveAs("hbSmooth.png");
+
+  // abnormal bin counters
+  int n00=0;
+  int n01=0;
+  int n10=0;
+
+  for (int i=1;i<nx+1;i++){
+    for (int j=1;j<ny+1;j++){
+
+      ibin=hs->GetBin(i,j);
+
+      // GENA: Will fill each bin with its original index
+      vMap[ibin].push_back(ibin);
+
+      xs=hs->GetBinContent(ibin);
+      xb=hb->GetBinContent(ibin);
+      xs_s=hsSmooth->GetBinContent(ibin);
+      xb_s=hbSmooth->GetBinContent(ibin);
+
+
+
+      //std::cout << "DEBUG*****!!!!!  145/150: " << fs_mass->Eval(145.0)
+      //	<< "  /  " << fs_mass->Eval(155.0)
+      //	<< std::endl;
+
+      // s/b: 10 00 11 01
+      /*
+      if (xb>0){
+	if (xs>0){ // [1;1000]
+	  xsb[ibin]=xs/xb+1.0;
+	}
+	else{      // [0;1]
+	  //xsb[ibin]=1.0 - xb/(xb+1.0);
+	  xsb[ibin]=((float)ibin)/((float)ibin+1.0);
+	}
+      }else{
+        if (xs>0){ // (2000; up)
+          //xsb[ibin]=2000.0+xs;
+          xsb[ibin]=2000.0+(float)ibin;
+        }else{     // [1000;1001]
+          xsb[ibin]=ibin/10000.0+1000.0;
+        }
+      }
+      */
+
+      // original Ulrich:
+      //if (xb>0) {
+      //  xsb[ibin]=xs/xb;
+      //}else{
+      //  if (xs>0){
+      //    xsb[ibin]=999;
+      //  }else{
+      //    xsb[ibin]=0;
+      //  }
+      //}
+      
+      // modified Ulrich:
+      if (xb_s>0) {
+        xsb[ibin]=xs_s/xb_s;
+	if (xs_s>0){}
+	else{
+	  ++n01;
+	}
+      }else{
+        if (xs_s>0){
+          xsb[ibin]=999;
+	  ++n10;
+        }else{
+          xsb[ibin]=0;
+	  ++n00;
+        }
+      }
+      
+      xx[ibin][0]=xs;
+      xe[ibin][0]=hs->GetBinError(ibin);
+      xx[ibin][1]=xb;
+      xe[ibin][1]=hb->GetBinError(ibin);
+      for (int k=0;k<nb;k++){
+	xx[ibin][k+2]=hX[k]->GetBinContent(ibin);
+	xe[ibin][k+2]=hX[k]->GetBinError(ibin);
+      }
+
+      // S/B control plots
+      //if (xb>0) h1sb->SetBinContent(ibin,xs/xb);
+      //hLogSb.Fill(xsb[ibin]);
+      hLogSb.Fill(_logsb);
+
+      h1sb->SetBinContent(ibin,xsb[ibin]);
+      h1s->SetBinContent(ibin,xx[ibin][0]);
+      h1s->SetBinError(ibin,xe[ibin][0]);
+      h1b->SetBinContent(ibin,xx[ibin][1]);
+      h1b->SetBinError(ibin,xe[ibin][1]);
+      
+      _sum += xx[ibin][0];
+    }
+  }
+
+
+
+  std::cout << "SUM: " << _sum << std::endl;
+
+  // clean up fits
+  delete hsSmooth;
+  delete hbSmooth;
+  // FIXME: 
+  //delete _f2s;
+
+  if (make_plots){  
+    // plot S/B hist
+    TCanvas c1;
+    c1.SetLogy();
+    h1sb->SetMinimum(0.00001);
+    h1sb->Draw();
+    std::string _fit_fname = channel+"_sb.pdf";
+    c1.SaveAs( _fit_fname.c_str() );
+    TCanvas c6;
+    //c6.SetLogy();
+    //hLogSb->SetMinimum(0.00001);
+    hLogSb.Draw();
+    _fit_fname = channel+"_logsb.pdf";
+    c6.SaveAs( _fit_fname.c_str() );
+  }
+
+  //sort all histogram bins in decreasing s/b
+  int nswap=1;
+  float xtmp;
+
+  // GENA: for bin map
+  int ibin_tmp;
+
+  while (nswap>0) {
+    nswap=0;
+    for (int i=0;i<nbin-1;i++) {
+      if (xsb[i]<xsb[i+1]){
+	xtmp=xsb[i];
+	xsb[i]=xsb[i+1];
+	xsb[i+1]=xtmp;
+
+	// GENA: for bin map
+	ibin_tmp = vMap[i][0];
+	vMap[i][0] = vMap[i+1][0];
+	vMap[i+1][0] = ibin_tmp;
+
+	for (int j=0;j<nb+2;j++){
+	  xtmp=xx[i][j];
+	  xx[i][j]=xx[i+1][j];
+	  xx[i+1][j]=xtmp;
+
+	  xtmp=xe[i][j];
+	  xe[i][j]=xe[i+1][j];
+	  xe[i+1][j]=xtmp;
+	}
+	nswap=nswap+1;
+      }
+    }
+  }
+
+  //these histograms have the bins ordered in decrerasing s/b for diagnostics
+  TH1F *h1sb1 = new TH1F("h1sb1","h1sb1",nbin,0,nbin);
+  TH1F *h1fe1 = new TH1F("h1fe1","h1fe1",nbin,0,nbin);
+  TH1F *h1s1 = new TH1F("h1s1","h1s1",nbin,0,nbin);
+  TH1F *h1b1 = new TH1F("h1b1","h1b1",nbin,0,nbin);
+  for (int i=0;i<nbin;i++){
+    h1sb1->SetBinContent(i+1,xsb[i]);
+    if (xx[i][1]>0) h1fe1->SetBinContent(i+1,xe[i][1]/xx[i][1]);
+    h1s1->SetBinContent(i+1,xx[i][0]);
+    h1s1->SetBinError(i+1,xe[i][0]);
+    h1b1->SetBinContent(i+1,xx[i][1]);
+    h1b1->SetBinError(i+1,xe[i][1]);
+  }
+
+  //combine bins starting with the highest s/b until the fractional error in
+  //the total backround in every bin is smaller than femax
+  int ncomb=1;
+  //float xtmp;
+  float fe=0;
+  double _max_bin_err = 1.0;
+  while (ncomb>0) {
+    ncomb=0;
+    for (int i=0;i<nbin-1;i++){
+
+      bool err_too_large = false;
+      for (int m=0; m!=2; ++m){
+	if (m==2) continue;
+	if (xx[i][m]>0){
+	  fe=xe[i][m]/xx[i][m]; //fractional error in signal (0) and background (1)
+	}else{
+	  fe=1;
+	}
+
+	if ( m<vFemax.size() ) _max_bin_err = vFemax[m];
+	else _max_bin_err = vFemax[1];
+
+	if (fe>_max_bin_err) err_too_large = true;
+      }
+
+      if (err_too_large){
+
+	// GENA: write down bin
+	for (std::vector<int>::const_iterator vi=vMap[i+1].begin();
+	     vi != vMap[i+1].end(); ++vi){
+	  vMap[i].push_back(*vi);
+	}
+	//move all successive bins up
+	vMap.erase(vMap.begin()+i+1);
+
+	for (int k=0;k<nb+2;k++){ //add the next bin
+	  xx[i][k]=xx[i][k]+xx[i+1][k];
+	  xe[i][k]=sqrt(xe[i][k]*xe[i][k]+xe[i+1][k]*xe[i+1][k]);
+	  for (int j=i+1;j<nbin-1;j++){ //move all successive bins up
+	    xx[j][k]=xx[j+1][k];
+	    xe[j][k]=xe[j+1][k];
+	  }
+	}
+
+	ncomb++;
+	nbin=nbin-1; //decrease the total number of bins
+      }
+
+    }
+    
+  }
+  // check the last bin and add it to the previous if uncertainty is high
+  int i = nbin-1;
+
+  bool err_too_large = false;
+  for (int m=0; m!=2; ++m){
+    if (m==2) continue;
+    if (xx[i][m]>0){
+      fe=xe[i][m]/xx[i][m]; //fractional error in background
+    }else{
+      fe=1;
+    }
+
+    if ( m<vFemax.size() ) _max_bin_err = vFemax[m];
+    else _max_bin_err = vFemax[1];
+
+    if (fe>_max_bin_err) err_too_large = true;
+  }
+  
+  if (err_too_large){
+
+    std::cout << "Fixing the last bin" << std::endl;
+
+    i = nbin-2;
+    
+    // GENA: write down bin
+    for (std::vector<int>::const_iterator vi=vMap[i+1].begin();
+	 vi != vMap[i+1].end(); ++vi){
+      vMap[i].push_back(*vi);
+    }
+    //move all successive bins up
+    vMap.erase(vMap.begin()+i+1);
+    
+    for (int k=0;k<nb+2;k++){ //add the next bin
+      xx[i][k]=xx[i][k]+xx[i+1][k];
+      xe[i][k]=sqrt(xe[i][k]*xe[i][k]+xe[i+1][k]*xe[i+1][k]);
+      for (int j=i+1;j<nbin-1;j++){ //move all successive bins up
+	xx[j][k]=xx[j+1][k];
+	xe[j][k]=xe[j+1][k];
+      }
+    } // end of last bin treatment
+    
+    nbin=nbin-1; //decrease the total number of bins
+  }
+  
+  // check the last bin again
+  i = nbin-1;
+  if (xx[i][1]>0){
+    fe=xe[i][1]/xx[i][1]; //fractional error in background
+  }else{
+    fe=1;
+  }
+  std::cout << "Last bin error: " << fe << std::endl;
+
+
+
+
+  //GENA: open the map file
+  std::ofstream mapFile;
+  std::string mapFileName = outFileName+".binmap";
+  mapFile.open(mapFileName.c_str());
+  int bin_count = 0;
+  for (std::vector<std::vector<int> >::const_iterator i=vMap.begin();
+       i != vMap.end(); ++i){
+
+    mapFile << " " << i-vMap.begin()+1 << ":";
+
+    for(std::vector<int>::const_iterator j=i->begin();
+	j != i->end(); ++j){
+      mapFile << " " << *j;
+      ++bin_count;
+    }
+
+    mapFile << std::endl;
+
+  }
+  //GENA: close the map file
+  mapFile.close();
+
+  //these are the output histograms
+  std::string sname_out = prefix + std::string(sname);
+  TFile *f2 = TFile::Open(oname,"recreate");
+  TH1F *h1feb2 = new TH1F("h1fe2","h1fe2",nbin,0,nbin);
+  //TH1F *h1s2 = new TH1F(sname,sname,nbin,0,nbin);
+  TH1F *h1s2 = new TH1F(sname_out.c_str(),sname_out.c_str(),nbin,0,nbin);
+  TH1F *h1b2 = new TH1F("h1b2","h1b2",nbin,0,nbin);
+  TH1F *h1X2[30];
+  for (int i=0;i<nb;i++){
+    std::string _bname = prefix + std::string(bname[i]);
+    //h1X2[i] = new TH1F(bname[i],bname[i],nbin,0,nbin);
+    h1X2[i] = new TH1F(_bname.c_str(),_bname.c_str(),nbin,0,nbin);
+  }
+  for (int i=0;i<nbin;i++){
+    h1feb2->SetBinContent(i+1,xe[i][1]/xx[i][1]);
+    h1s2->SetBinContent(i+1,xx[i][0]);
+    h1s2->SetBinError(i+1,xe[i][0]);
+    h1b2->SetBinContent(i+1,xx[i][1]);
+    h1b2->SetBinError(i+1,xe[i][1]);
+    for (int j=0;j<nb;j++){
+      h1X2[j]->SetBinContent(i+1,xx[i][j+2]);
+      h1X2[j]->SetBinError(i+1,xe[i][j+2]);
+    }
+  }
+  
+  std::cout << "Merged 1D hist name: " << h1s2->GetName() << std::endl;
+  std::cout << "Integral with overflow: " << h1s2->Integral(0,nbin+1) << std::endl;
+  std::cout << "Integral no overflow: " << h1s2->Integral(1,nbin) << std::endl << std::endl;
+  h1s2->SetEntries(sEntries);
+  h1s2->Write();
+  for (int j=0;j<nb;j++){
+    std::cout << "Merged 1D hist name: " << h1X2[j]->GetName() << std::endl;
+    std::cout << "Integral with overflow: " << h1X2[j]->Integral(0,nbin+1) << std::endl;
+    std::cout << "Integral no overflow: " << h1X2[j]->Integral(1,nbin) << std::endl << std::endl;
+    h1X2[j]->SetEntries(bEntries[j]);
+    h1X2[j]->Write();
+  }
+  
+  h1s2->Print("base");
+
+  f2->Close();
+  f->Close();
+
+  //std::cout << "map size: " << vMap.size() << " combined bins" << std::endl;
+  //std::cout << "total bins merged: " << bin_count << std::endl;
+
+  std::cout << "Bins with S=0, B=0: " << n00 << std::endl;
+  std::cout << "Bins with S=0, B>0: " << n01 << std::endl;
+  std::cout << "Bins with S>0, B=0: " << n10 << std::endl;
+  
+}

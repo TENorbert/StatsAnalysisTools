@@ -1,0 +1,25 @@
+
+#Template Datacard for Higgs Analysis Tool
+
+imax  [number of categories]
+jmax  [number of backgrounds]
+kmax [number of sources of systematic uncertainty]
+------------                                                                                                                                                                          
+bin 1 2                                                                                                                                                                               
+observation [OBS1] [OBS2]  # for each category
+------------                                                                                                                                                                          
+bin 1 1 2 2                                                                                                                                                                           
+process sig bkg sig bkg  # just a name
+process 0 1 0 1   # just an index                                                                                                                                                       
+rate [SIG1] [BKG1]  [SIG2] [BKG2]  # expected # of evts for signal and background in each category
+------------             
+# systematics for signal and background -- number of rows must sum to kmax
+# placement in column determines signal or background
+# prior shape can be log-normal for multiplicative errors (lnN) or 
+# Gamma (gmN) for extrapolation from control region
+[signal systematic 1]   lnN [S1_ERR1] - [S1_ERR2] -   
+...
+[bkg systematic 1]   gmN  [# in sideband] - [B1 extrapolation factor] - [B2 extrapolation factor]
+[bkg systematic 2]   lnN - [B1_ERR1] - [B2_ERR2]
+...                                                         
+

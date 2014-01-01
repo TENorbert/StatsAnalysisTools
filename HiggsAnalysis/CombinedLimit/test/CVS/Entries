@@ -1,0 +1,16 @@
+/combine_crab.cfg/1.1/Tue May  3 14:02:33 2011//TV01-13-02
+/combine_crab.sh/1.1/Tue May  3 14:02:33 2011//TV01-13-02
+/compile-standalone.sh/1.1/Tue Jan 11 22:17:52 2011//TV01-13-02
+/datacardDump.py/1.1/Fri Mar 23 13:22:54 2012//TV01-13-02
+/diffNuisances.py/1.5/Thu Dec  1 21:47:09 2011//TV01-13-02
+/leeFromUpcrossings.py/1.2/Thu Dec 15 11:25:01 2011//TV01-13-02
+/makeGridUsingCrab.py/1.10/Fri Jan 13 14:55:10 2012//TV01-13-02
+/mkBayesUsingCrab.py/1.2/Tue Jul 26 14:09:32 2011//TV01-13-02
+/mlfitNormsToText.py/1.1/Fri Aug 12 15:01:02 2011//TV01-13-02
+/morphing_tests.cxx/1.1/Tue Aug 23 13:46:22 2011//TV01-13-02
+/splitToys.py/1.2/Wed Feb  8 07:57:13 2012//TV01-13-02
+/th1fmorph.C/1.1/Fri Jun 24 18:42:26 2011//TV01-13-02
+D/plotting////
+D/poc////
+D/unit////
+D/validation////

@@ -1,0 +1,28 @@
+<!DOCTYPE Combination  SYSTEM './config/HistFactorySchema.dtd'>
+
+<Combination OutputFilePrefix="./results/tprime" >
+
+  <Input>hf_ejets_auto.xml</Input> 
+  <Input>hf_mujets_auto.xml</Input>
+
+  <Measurement Name="tprimeCrossSection" Lumi="1.0" LumiRelErr="0.022" ExportOnly="True">
+
+    <POI>xsec</POI>
+
+    <ParamSetting Const="True">norm_ewk_mu</ParamSetting>
+    <ParamSetting Const="True">norm_ewk_e</ParamSetting>
+    
+
+  </Measurement>
+  
+</Combination>
+
+<!--
+    <ConstraintTerm Type="Gaussian" RelativeUncertainty=".05">alpha_jes</ConstraintTerm>
+    <ConstraintTerm Type="Gaussian" RelativeUncertainty=".05">alpha_match</ConstraintTerm>
+    <ConstraintTerm Type="Gaussian" RelativeUncertainty=".065">alpha_norm_top_syst</ConstraintTerm>
+    <ConstraintTerm Type="Gaussian" RelativeUncertainty=".50">alpha_norm_ewk_syst</ConstraintTerm>
+    <ConstraintTerm Type="Gaussian" RelativeUncertainty=".021">alpha_lepton_eff_e</ConstraintTerm>
+    <ConstraintTerm Type="Gaussian" RelativeUncertainty=".022">alpha_lepton_eff_mu</ConstraintTerm>
+
+-->

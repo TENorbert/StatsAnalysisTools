@@ -1,0 +1,59 @@
+2D histograms Ht(final state objects) vs Mreco, with 20 GeV binning:
+
+TH2F(histN,"H_{t} fitted objects vs M_{reco}",45, 100, 1000, 90, 200, 2000)
+
+The upper limits are such that for t' with Mt = 575 GeV, 
+the events in overflow are at few permill level.
+
+All MC background histograms are normalized to the data luminosity
+using their production x-sections, for ttbar the CMS measurement is used.
+
+Correction for trigger eff applied.
+Btag SF applied on jet-by-jet basis for all MC samples.
+Muon IdSF = 0.99 applied.
+
+Single Top tW channel histograms for t and tbar are combined into one
+histogram since their x-sections are identical.
+
+All histograms for the t' signal are normalized assuming x-sect = 1 pb. 
+The t' signal points cover the mass range 400 GeV - 625 GeV in 25 GeV intervals.
+
+---------------------------------------------------------------------------------------
+
+Fit conditions:
+
+The number of input jets to the fit is 5 in case Njets > 4.
+
+CSV btagger used.
+
+v1 - consider only combinations in which a CSVm b-tagged jet is used as a b-quark
+     and select from this subset the combination with min xi**2.
+
+v2 - consider only combinations in which a pair of one CSVm and one CSVl b-tagged jets
+     plays the role of the b-quark pair in the final state and
+     select from this subset the combination with min xi**2.
+
+v2_prob.01 - same as v2 with a cut on the best fit combination Prob(xi**2) > 1%
+
+
+---------------------------------------------------------------------------------------
+
+ SM background x-sections [pb]
+
+ x-sect for TTjets =    165.80
+ x-sect for Wjets =   31314.00
+ x-sect for WWany =      43.00
+ x-sect for WZany =      18.00
+ x-sect for ZZany =       5.90
+ x-sect for Zjets =    3048.00
+ x-sect for tW =         15.74
+ x-sect for t t-chn =    41.90
+ x-sect for tbar t-chn = 22.65
+ x-sect for t s-chn =     3.19
+ x-sect for tbar s-chn =  1.44
+ x-sect for QCD MuEnriched = 84679.3
+
+---------------------------------------------------------------------------------------
+
+Lumi = 4601.4 pb-1
+

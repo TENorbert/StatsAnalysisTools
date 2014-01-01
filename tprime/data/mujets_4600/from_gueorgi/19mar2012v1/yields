@@ -1,0 +1,53 @@
+
+
+Lumi = 4894.5 pb-1
+
+
+Selected number of ttjets events =  5463.0 +/- 44.7 
+Selected number of Wjets events =   752.2 +/- 50.8 
+
+-------------------------
+Selected number of WWany events =    10.9 +/- 1.01 
+Selected number of WZany events =     3.5 +/- 0.35 
+Selected number of ZZany events =     0.4 +/- 0.07 
+-------------------------
+All selected number of VV events =   14.8 +/- 1.07 
+
+Selected number of QCD_MuEnriched events =    5.43 +/- 5.43 
+Selected number of Zjets events =    54.0 +/-  6.3 
+
+-------------------------
+Selected number of SingleTop tW events =   241.2 +/-  4.5 
+Selected number of SingleTop t-channel events =    53.1 +/-  2.2 
+Selected number of SingleTop s-channel events =     9.1 +/-  1.0 
+Selected number of SingleTopbar t-channel events =    29.3 +/-  1.7 
+Selected number of SingleTopbar s-channel events =     3.3 +/-  0.5 
+-------------------------
+All selected number of SingleTop events =   336.0 +/-  5.5 
+
+Selected number of t't' 400 GeV events =   370.8 +/-  5.6 
+Signal eff for t' 400 GeV = 0.0538858 +/- 0.000806763
+Selected number of t't' 425 GeV events =   262.7 +/-  3.5 
+Signal eff for t' 425 GeV = 0.0560933 +/- 0.000754408
+Selected number of t't' 450 GeV events =   195.8 +/-  2.8 
+Signal eff for t' 450 GeV = 0.0604391 +/- 0.000863678
+Selected number of t't' 475 GeV events =   138.4 +/-  1.8 
+Signal eff for t' 475 GeV = 0.0609458 +/- 0.000793106
+Selected number of t't' 500 GeV events =   100.5 +/-  1.6 
+Signal eff for t' 500 GeV = 0.0622108 +/- 0.000969363
+Selected number of t't' 525 GeV events =    74.4 +/-  0.9 
+Signal eff for t' 525 GeV = 0.0643053 +/- 0.000817472
+Selected number of t't' 550 GeV events =    54.4 +/-  0.9 
+Signal eff for t' 550 GeV = 0.064842 +/- 0.00107008
+Selected number of t't' 575 GeV events =    40.3 +/-  0.5 
+Signal eff for t' 575 GeV = 0.0656917 +/- 0.000811668
+Selected number of t't' 600 GeV events =    29.8 +/-  0.5 
+Signal eff for t' 600 GeV = 0.066026 +/- 0.00112164
+Selected number of t't' 625 GeV events =    21.8 +/-  0.3 
+Signal eff for t' 625 GeV = 0.0649327 +/- 0.000805194
+
+
+Number of data events = 6448
+Total expected bckg events =  6625.5 +/- 68.4 
+
+

@@ -1,0 +1,17 @@
+    Data 4.68 fb^{-1}     4731.00   nEntries=   4734
+    QCD     77.64   nEntries=    998
+    Z+jets     48.59   nEntries=    119
+    Single Top     207.98   nEntries=   4413
+    W+jets     458.81   nEntries=   1502
+    t#bar{t}     3950.12   nEntries=  20252
+    Tprime (400 GeV)     212.91   nEntries=   4883
+    Tprime (425 GeV)     217.66   nEntries=   8270
+    Tprime (450 GeV)     235.33   nEntries=   5188
+    Tprime (475 GeV)     234.04   nEntries=   8672
+    Tprime (500 GeV)     237.07   nEntries=   5451
+    Tprime (525 GeV)     233.87   nEntries=   8938
+    Tprime (550 GeV)     243.74   nEntries=   5539
+    Tprime (575 GeV)     236.30   nEntries=   9185
+    Tprime (600 GeV)     234.76   nEntries=   5233
+    Tprime (625 GeV)     241.24   nEntries=   9471
+

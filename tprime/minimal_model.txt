@@ -1,0 +1,27 @@
+Hi Gena,
+
+I think as inputs just take Andrew-F¢s histograms for now. Make up -A
+any uncertainty values that you need.
+
+I think the minimum should be that you set the limit based on 
+the mass spectrum in e+jets and mu+jets separately and combined. 
+I suggest you constrain the ttbar component to the expected 
+number of events +-10% (I am making up the uncertainties here 
+right now %G-Fâ€“%@ we can substitute different values -A
+later). Constrain the QCD background to expectations within an 
+uncertainty (make something up) and you leave the W+jets 
+background floating without constraint. Include at least one 
+shape uncertainty (jes for example) for all sources. include the 
+luminosity uncertainty and an efficiency uncertainty (relevant 
+for the signal and the ttbar). I think these are the main 
+ingredients. So to summarize you have the following components 
+and uncertainties:
+           ttbar xsection | QCD | jes | lumi | lepton efficiency |
+ttbar      x              |  -  |  x  |   x  |       *           |
+W+jets     -              |  -  |  x  |   -  |       -           |
+QCD        -              |  *  |  -  |   -  |       -           |
+tprime     -              |  -  |  x  |   x  |       *           |
+
+- means does not apply
+x means correlated for e and mu
+* means uncorrelated for e and mu

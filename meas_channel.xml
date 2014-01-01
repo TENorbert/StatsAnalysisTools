@@ -1,0 +1,25 @@
+<!--
+This xml file created automatically on: 
+2013-3-21
+-->
+<!DOCTYPE Channel  SYSTEM 'HistFactorySchema.dtd'>  
+
+  <Channel Name="channel" InputFile="" >
+
+    <Data HistoName="h_dataTime" InputFile="./data_bg_file.root" HistoPath=""  /> 
+
+    <StatErrorConfig RelErrorThreshold="0.05" ConstraintType="Poisson" /> 
+
+    <Sample Name="h_sgTime__ctau6000_hehb"  HistoPath=""  HistoName="h_sgTime__ctau6000_hehb"  InputFile="./sig_gmbs600.root"  NormalizeByTheory="True" >
+      <OverallSys Name="syst1"  High="1.05"  Low="0.95"   /> 
+      <NormFactor Name="SigXsecOverSM"  Val="1"  High="3"  Low="0"  Const="False"   /> 
+    </Sample>
+
+
+    <Sample Name="h_bgTime"  HistoPath=""  HistoName="h_bgTime"  InputFile="./data_bg_file.root"  NormalizeByTheory="True" >
+      <OverallSys Name="syst2"  High="1.05"  Low="0.95"   /> 
+    </Sample>
+
+
+
+  </Channel>  

@@ -1,0 +1,27 @@
+/GetLimitBayesian.py/1.2/Tue Jan 10 16:10:19 2012//
+/GetLimitBayesianMass.py/1.2/Tue Jan 10 21:19:23 2012//
+/GetLimitCLs.py/1.2/Tue Jan 10 16:10:19 2012//
+/GetLimitCLsMass.py/1.1/Thu Jan 12 16:13:00 2012//
+/GetParameters.py/1.1/Tue Jan 10 16:07:26 2012//
+/GetWorkspace.py/1.1/Tue Jan 10 16:07:26 2012//
+/GetWorkspaceSigma.py/1.1/Tue Jan 10 16:07:26 2012//
+/PlotLimitsLifetimeExpected.py/1.1/Tue Jan 10 16:07:26 2012//
+/PlotLimitsMass.py/1.1/Tue Jan 10 16:07:26 2012//
+/cmslpc_standalone_setup.csh/1.1/Fri Jan 13 01:19:40 2012//
+/cmslpc_standalone_setup.sh/1.1/Tue Jan 10 16:14:41 2012//
+/dataFileElectrons/1.1/Tue Jan 10 21:19:44 2012//
+/dataFileMuons/1.1/Tue Jan 10 21:19:44 2012//
+/main.py/1.2/Tue Jan 10 21:19:23 2012//
+/mainCLs.py/1.1/Thu Jan 12 16:13:00 2012//
+/mainSigmaBayesian.py/1.2/Tue Jan 10 16:10:19 2012//
+/mainSigmaCLs.py/1.2/Tue Jan 10 16:10:19 2012//
+/parseEfficiencyFiles.pl/1.1/Tue Jan 10 21:20:06 2012//
+/roostats_cl95.C/1.1/Tue Jan 10 21:20:06 2012//
+/runEventsLimitsJobs.py/1.1/Fri Jan 13 22:45:21 2012//
+/runLifetimeJobs.py/1.1/Fri Jan 13 22:45:21 2012//
+/submitEventsLimitsJobs.py/1.2/Tue Jan 10 21:19:24 2012//
+/submitLifetimeJobs.py/1.2/Tue Jan 10 21:19:24 2012//
+/submitLifetimeJobsBayesian.py/1.2/Tue Jan 10 21:19:24 2012//
+/submitLifetimeJobsCLs.py/1.3/Fri Jan 13 21:53:15 2012//
+/tdrstyle.C/1.1/Fri Jan 13 21:53:15 2012//
+D

@@ -1,0 +1,8 @@
+
+For the toy MC expected limits
+./tmp/fitAppToy default <LAMBDA> <CTAU> <NUMBER OF TOYS>
+./tmp/fitAppToy default 100 250 500 
+
+For the observed limits
+./tmp/fitAppToy default <LAMBDA> <CTAU> 
+./tmp/fitApp 100 250
